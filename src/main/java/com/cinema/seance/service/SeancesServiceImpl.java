@@ -1,9 +1,15 @@
 package com.cinema.seance.service;
 
+import com.cinema.seance.api.dto.HallDto;
+import com.cinema.seance.api.dto.VisitorDto;
 import com.cinema.seance.model.Seance;
 import com.cinema.seance.model.Ticket;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +26,15 @@ public final class SeancesServiceImpl implements SeancesService {
 
     @Override
     public Ticket sellTicket(UUID visitor, Seance seance, int line, int place) {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<VisitorDto> rateResponse =
+                restTemplate.exchange("https://localhost:8083/visitor/withdraw/"
+                                + visitor.toString(),
+                        HttpMethod.PUT, null, new ParameterizedTypeReference<>() {
+                        });
+        VisitorDto savedVisitor = rateResponse.getBody();
+        if (visitor == null)
+            throw new IllegalArgumentException("Balance can't be updated");
         cash += seance.getPrice();
         Ticket ticket = ticketsService.setVisitorToTicket(visitor, seance, line, place);
         return ticket;
@@ -31,9 +46,17 @@ public final class SeancesServiceImpl implements SeancesService {
     }
 
     @Override
-    public Seance addSeance(Seance seance, int lines, int seats) {
+    public Seance addSeance(Seance seance) {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<HallDto> rateResponse =
+                restTemplate.exchange("https://localhost:8083/hall/" + seance.getHallID().toString(),
+                        HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                        });
+        HallDto hall = rateResponse.getBody();
+
+        if (hall == null) return null;
         Seance savedSeance = seancesRepository.save(seance);
-        createTickets(seance, lines, seats);
+        createTickets(seance, hall.getLinesNum(), hall.getSeatsNum());
         return savedSeance;
     }
 

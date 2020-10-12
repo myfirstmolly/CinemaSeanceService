@@ -11,7 +11,7 @@ public interface SeancesService {
 
     double getCash();
 
-    Seance addSeance(Seance seance, int lines, int seats);
+    Seance addSeance(Seance seance);
 
     List<Seance> getAllSeances();
 
