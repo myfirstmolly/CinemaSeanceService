@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cinema-seances
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cinema-seances
+  template:
+    metadata:
+      labels:
+        app: cinema-seances
+    spec:
+      containers:
+        - image: myfirstmolly/seanceservice
+          name: cinema-seances
+          ports:
+            - containerPort: 8082
+              name: cinema-seances
+          env:
+            - name: POSTGRES_ENDPOINT
+              value: "jdbc:postgresql://192.168.0.101:5432/"
+            - name: POSTGRES_PASSWORD
+              value: "password"
+            - name: POSTGRES_USERNAME
+              value: "postgres"
