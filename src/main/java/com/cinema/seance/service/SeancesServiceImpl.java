@@ -2,10 +2,13 @@ package com.cinema.seance.service;
 
 import com.cinema.seance.api.dto.HallDto;
 import com.cinema.seance.api.dto.VisitorDto;
+import com.cinema.seance.api.dto.WithdrawDto;
 import com.cinema.seance.model.Seance;
 import com.cinema.seance.model.Ticket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,15 +29,16 @@ public final class SeancesServiceImpl implements SeancesService {
 
     @Override
     public Ticket sellTicket(UUID visitor, Seance seance, int line, int place) {
+        HttpHeaders headers = new HttpHeaders();
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<VisitorDto> rateResponse =
-                restTemplate.exchange("https://localhost:8083/visitor/withdraw/"
-                                + visitor.toString(),
-                        HttpMethod.PUT, null, new ParameterizedTypeReference<>() {
-                        });
-        VisitorDto savedVisitor = rateResponse.getBody();
-        if (visitor == null)
-            throw new IllegalArgumentException("Balance can't be updated");
+        WithdrawDto withdrawDto = new WithdrawDto(seance.getPrice());
+        HttpEntity<WithdrawDto> entity = new HttpEntity<>(withdrawDto, headers);
+        ResponseEntity<VisitorDto> response =
+                restTemplate.exchange("http://cinema-visitors:8084/visitor/withdraw/" + visitor.toString(),
+                        HttpMethod.PUT,
+                        entity,
+                        VisitorDto.class);
+
         cash += seance.getPrice();
         Ticket ticket = ticketsService.setVisitorToTicket(visitor, seance, line, place);
         return ticket;
@@ -49,12 +53,12 @@ public final class SeancesServiceImpl implements SeancesService {
     public Seance addSeance(Seance seance) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<HallDto> rateResponse =
-                restTemplate.exchange("https://localhost:8083/hall/" + seance.getHallID().toString(),
-                        HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                restTemplate.exchange("http://cinema-halls:8083/hall/" + seance.getHallID().toString(),
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<>() {
                         });
         HallDto hall = rateResponse.getBody();
-
-        if (hall == null) return null;
         Seance savedSeance = seancesRepository.save(seance);
         createTickets(seance, hall.getLinesNum(), hall.getSeatsNum());
         return savedSeance;
