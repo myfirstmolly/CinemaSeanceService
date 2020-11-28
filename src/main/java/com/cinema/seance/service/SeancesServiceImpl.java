@@ -37,33 +37,15 @@ public final class SeancesServiceImpl implements SeancesService {
     private double cash;
 
     @Override
-    public Ticket sellTicket(UUID visitor, Seance seance, int line, int place) {
-        HttpHeaders headers = new HttpHeaders();
-        RestTemplate restTemplate = new RestTemplate();
-        WithdrawDto withdrawDto = new WithdrawDto(seance.getPrice());
-        HttpEntity<WithdrawDto> entity = new HttpEntity<>(withdrawDto, headers);
-        ResponseEntity<VisitorDto> response =
-                restTemplate.exchange("http://cinema-visitors:8084/visitor/withdraw/" + visitor.toString(),
-                        HttpMethod.PUT,
-                        entity,
-                        VisitorDto.class);
-
-        cash += seance.getPrice();
-        Ticket ticket = ticketsService.setVisitorToTicket(visitor, seance, line, place);
-        return ticket;
-    }
-
-    @Override
     public Seance addSeanceGrpc(SeanceRequest request) {
-        String url = "localhost";
-        ManagedChannel hallChannel = ManagedChannelBuilder.forAddress(url, 7083).usePlaintext().build();
+        ManagedChannel hallChannel = ManagedChannelBuilder.forAddress("localhost", 7083).usePlaintext().build();
         HallServiceGrpc.HallServiceBlockingStub hallStub = HallServiceGrpc.newBlockingStub(hallChannel);
         HallByNameRequest hall = HallByNameRequest.newBuilder().
                 setName(request.getHall().getName()).
                 build();
         HallResponse hallResponse = hallStub.byName(hall);
 
-        ManagedChannel filmChannel = ManagedChannelBuilder.forAddress(url, 7081).usePlaintext().build();
+        ManagedChannel filmChannel = ManagedChannelBuilder.forAddress("localhost", 7081).usePlaintext().build();
         FilmServiceGrpc.FilmServiceBlockingStub filmStub = FilmServiceGrpc.newBlockingStub(filmChannel);
         FilmByNameRequest film = FilmByNameRequest.newBuilder().
                 setName(request.getFilm().getName()).
@@ -124,6 +106,23 @@ public final class SeancesServiceImpl implements SeancesService {
     @Override
     public void deleteAllSeancesByFilm(UUID film) {
         seancesRepository.deleteAllByFilmId(film);
+    }
+
+    @Override
+    public Ticket sellTicket(UUID visitor, Seance seance, int line, int place) {
+        HttpHeaders headers = new HttpHeaders();
+        RestTemplate restTemplate = new RestTemplate();
+        WithdrawDto withdrawDto = new WithdrawDto(seance.getPrice());
+        HttpEntity<WithdrawDto> entity = new HttpEntity<>(withdrawDto, headers);
+        ResponseEntity<VisitorDto> response =
+                restTemplate.exchange("http://cinema-visitors:8084/visitor/withdraw/" + visitor.toString(),
+                        HttpMethod.PUT,
+                        entity,
+                        VisitorDto.class);
+
+        cash += seance.getPrice();
+        Ticket ticket = ticketsService.setVisitorToTicket(visitor, seance, line, place);
+        return ticket;
     }
 
 }

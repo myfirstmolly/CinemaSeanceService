@@ -4,12 +4,14 @@ import com.cinema.seance.*;
 import com.cinema.seance.model.Seance;
 import com.cinema.seance.service.SeancesService;
 import io.grpc.stub.StreamObserver;
+import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@GRpcService
 public class SeanceGrpcController extends SeanceServiceGrpc.SeanceServiceImplBase {
 
     @Autowired
@@ -26,7 +28,6 @@ public class SeanceGrpcController extends SeanceServiceGrpc.SeanceServiceImplBas
                 build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
-
     }
 
     @Override
