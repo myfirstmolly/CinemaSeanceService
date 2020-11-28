@@ -12,4 +12,16 @@ public class HallDto {
     private String name;
     private int linesNum;
     private int seatsNum;
+
+    public UUID getHallId() {
+        return hallId;
+    }
+
+    public int getLinesNum() {
+        return linesNum;
+    }
+
+    public int getSeatsNum() {
+        return seatsNum;
+    }
 }

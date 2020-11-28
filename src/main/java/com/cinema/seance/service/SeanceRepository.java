@@ -8,5 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface SeanceRepository extends JpaRepository<Seance, UUID> {
-    void deleteAllByFilmID(UUID film);
+    void deleteAllByFilmId(UUID film);
 }

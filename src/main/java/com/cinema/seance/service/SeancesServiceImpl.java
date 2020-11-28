@@ -1,10 +1,19 @@
 package com.cinema.seance.service;
 
+import com.cinema.film.FilmByNameRequest;
+import com.cinema.film.FilmResponse;
+import com.cinema.film.FilmServiceGrpc;
+import com.cinema.hall.HallByNameRequest;
+import com.cinema.hall.HallResponse;
+import com.cinema.hall.HallServiceGrpc;
+import com.cinema.seance.SeanceRequest;
 import com.cinema.seance.api.dto.HallDto;
 import com.cinema.seance.api.dto.VisitorDto;
 import com.cinema.seance.api.dto.WithdrawDto;
 import com.cinema.seance.model.Seance;
 import com.cinema.seance.model.Ticket;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -45,15 +54,38 @@ public final class SeancesServiceImpl implements SeancesService {
     }
 
     @Override
-    public double getCash() {
-        return cash;
+    public Seance addSeanceGrpc(SeanceRequest request) {
+        String url = "localhost";
+        ManagedChannel hallChannel = ManagedChannelBuilder.forAddress(url, 7083).usePlaintext().build();
+        HallServiceGrpc.HallServiceBlockingStub hallStub = HallServiceGrpc.newBlockingStub(hallChannel);
+        HallByNameRequest hall = HallByNameRequest.newBuilder().
+                setName(request.getHall().getName()).
+                build();
+        HallResponse hallResponse = hallStub.byName(hall);
+
+        ManagedChannel filmChannel = ManagedChannelBuilder.forAddress(url, 7081).usePlaintext().build();
+        FilmServiceGrpc.FilmServiceBlockingStub filmStub = FilmServiceGrpc.newBlockingStub(filmChannel);
+        FilmByNameRequest film = FilmByNameRequest.newBuilder().
+                setName(request.getFilm().getName()).
+                build();
+        FilmResponse filmResponse = filmStub.byName(film);
+
+        Seance seance = new Seance(UUID.randomUUID(),
+                request.getSeanceDate(),
+                request.getPrice(),
+                UUID.fromString(filmResponse.getId()),
+                UUID.fromString(hallResponse.getId()));
+
+        Seance savedSeance = seancesRepository.save(seance);
+        createTickets(seance, hallResponse.getLinesNum(), hallResponse.getSeatsNum());
+        return savedSeance;
     }
 
     @Override
     public Seance addSeance(Seance seance) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<HallDto> rateResponse =
-                restTemplate.exchange("http://cinema-halls:8083/hall/" + seance.getHallID().toString(),
+                restTemplate.exchange("http://cinema-halls:8083/hall/" + seance.getHallId().toString(),
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<>() {
@@ -91,7 +123,7 @@ public final class SeancesServiceImpl implements SeancesService {
 
     @Override
     public void deleteAllSeancesByFilm(UUID film) {
-        seancesRepository.deleteAllByFilmID(film);
+        seancesRepository.deleteAllByFilmId(film);
     }
 
 }

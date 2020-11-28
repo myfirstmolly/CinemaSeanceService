@@ -1,0 +1,23 @@
+syntax = "proto3";
+package com.cinema.hall;
+option java_multiple_files = true;
+
+message HallByIdRequest {
+  string id = 1;
+}
+
+message HallByNameRequest {
+  string name = 1;
+}
+
+message HallResponse {
+  string id = 1;
+  string name = 2;
+  int32 linesNum = 3;
+  int32 seatsNum = 4;
+}
+
+service HallService {
+  rpc byId(HallByIdRequest) returns (HallResponse);
+  rpc byName(HallByNameRequest) returns (HallResponse);
+}

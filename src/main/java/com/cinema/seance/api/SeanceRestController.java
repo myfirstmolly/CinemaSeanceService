@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequestMapping("/seance")
 @AllArgsConstructor
 @NoArgsConstructor
-public class SeanceController {
+public class SeanceRestController {
 
     @Autowired
     private SeancesService seancesService;

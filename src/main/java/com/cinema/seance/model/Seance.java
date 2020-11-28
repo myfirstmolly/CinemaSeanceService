@@ -1,9 +1,8 @@
 package com.cinema.seance.model;
 
+import com.cinema.seance.SeanceResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
 import javax.persistence.Entity;
@@ -16,31 +15,64 @@ import java.util.UUID;
 @EnableAutoConfiguration
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public final class Seance {
 
     @Id
     private UUID seanceId;
-
     private String seanceDate;
-
     private double price;
-
-    private UUID filmID;
-
-    private UUID hallID;
+    private UUID filmId;
+    private UUID hallId;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "seance")
     private List<Ticket> ticket;
 
-    public Seance(String date, double price, UUID filmId, UUID hallId) {
-        seanceId = UUID.randomUUID();
+    public Seance() {
+        this.seanceId = UUID.randomUUID();
+        ticket = new ArrayList<>();
+    }
+
+    public Seance(UUID id, String date, double price, UUID filmId, UUID hallId) {
+        seanceId = id;
         this.seanceDate = date;
         this.price = price;
-        this.filmID = filmId;
-        this.hallID = hallId;
+        this.filmId = filmId;
+        this.hallId = hallId;
         ticket = new ArrayList<>();
+    }
+
+    public SeanceResponse toSeanceResponse() {
+        return SeanceResponse.newBuilder().
+                setId(filmId.toString()).
+                setSeanceDate(seanceDate).
+                setPrice(price).
+                setFilmId(filmId.toString()).
+                setHallId(hallId.toString()).
+                build();
+    }
+
+    public UUID getSeanceId() {
+        return seanceId;
+    }
+
+    public String getSeanceDate() {
+        return seanceDate;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public UUID getFilmId() {
+        return filmId;
+    }
+
+    public UUID getHallId() {
+        return hallId;
+    }
+
+    public List<Ticket> getTicket() {
+        return ticket;
     }
 }

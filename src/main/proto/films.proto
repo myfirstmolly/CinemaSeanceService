@@ -1,0 +1,27 @@
+syntax = "proto3";
+package com.cinema.film;
+option java_multiple_files = true;
+
+enum Genre {
+  G = 0;
+  PG = 1;
+  PG13 = 2;
+  R = 3;
+  NC17 = 4;
+}
+
+message FilmResponse {
+  string id = 1;
+  string name = 2;
+  string director = 3;
+  int32 year = 4;
+  Genre genre = 5;
+}
+
+message FilmByNameRequest {
+  string name = 1;
+}
+
+service FilmService {
+  rpc byName(FilmByNameRequest) returns (FilmResponse);
+}

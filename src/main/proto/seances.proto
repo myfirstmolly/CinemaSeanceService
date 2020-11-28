@@ -1,0 +1,62 @@
+syntax = "proto3";
+package com.cinema.seance;
+option java_multiple_files = true;
+
+enum Genre {
+  G = 0;
+  PG = 1;
+  PG13 = 2;
+  R = 3;
+  NC17 = 4;
+}
+
+message Film {
+  string name = 1;
+  string director = 2;
+  int32 year = 3;
+  Genre genre = 4;
+}
+
+message Hall {
+  string name = 1;
+  int32 linesNum = 2;
+  int32 seatsNum = 3;
+}
+
+message SeanceResponse {
+  string id = 1;
+  string seanceDate = 2;
+  double price = 3;
+  string filmId = 4;
+  string hallId = 5;
+}
+
+message SeanceRequest {
+  string seanceDate = 2;
+  double price = 3;
+  Film film = 4;
+  Hall hall = 5;
+}
+
+message AllSeancesRequest {
+
+}
+
+message AllSeancesResponse {
+  repeated SeanceResponse seances = 1;
+}
+
+message SeanceByIdRequest {
+  string id = 1;
+}
+
+message DeleteSeanceResponse {
+
+}
+
+service SeanceService {
+  rpc all(AllSeancesRequest) returns (AllSeancesResponse);
+  rpc add(SeanceRequest) returns (SeanceResponse);
+  rpc byId(SeanceByIdRequest) returns (SeanceResponse);
+  rpc delete (SeanceByIdRequest) returns (DeleteSeanceResponse);
+}
