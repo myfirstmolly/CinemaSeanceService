@@ -18,10 +18,37 @@ message FilmResponse {
   Genre genre = 5;
 }
 
+message FilmRequest {
+  string name = 1;
+  string director = 2;
+  int32 year = 3;
+  Genre genre = 4;
+}
+
+message AllFilmsRequest {
+
+}
+
+message AllFilmsResponse {
+  repeated FilmResponse films = 1;
+}
+
+message FilmByIdRequest {
+  string id = 1;
+}
+
 message FilmByNameRequest {
   string name = 1;
 }
 
+message DeleteFilmResponse {
+
+}
+
 service FilmService {
+  rpc all(AllFilmsRequest) returns (AllFilmsResponse);
+  rpc add(FilmRequest) returns (FilmResponse);
+  rpc byId(FilmByIdRequest) returns (FilmResponse);
   rpc byName(FilmByNameRequest) returns (FilmResponse);
+  rpc delete (FilmByIdRequest) returns (DeleteFilmResponse);
 }

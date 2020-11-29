@@ -2,6 +2,27 @@ syntax = "proto3";
 package com.cinema.hall;
 option java_multiple_files = true;
 
+message HallResponse {
+  string id = 1;
+  string name = 2;
+  int32 linesNum = 3;
+  int32 seatsNum = 4;
+}
+
+message HallRequest {
+  string name = 2;
+  int32 linesNum = 3;
+  int32 seatsNum = 4;
+}
+
+message AllHallRequest {
+
+}
+
+message AllHallsResponse {
+  repeated HallResponse halls = 1;
+}
+
 message HallByIdRequest {
   string id = 1;
 }
@@ -10,14 +31,14 @@ message HallByNameRequest {
   string name = 1;
 }
 
-message HallResponse {
-  string id = 1;
-  string name = 2;
-  int32 linesNum = 3;
-  int32 seatsNum = 4;
+message DeleteHallResponse {
+
 }
 
 service HallService {
+  rpc all(AllHallRequest) returns (AllHallsResponse);
+  rpc add(HallRequest) returns (HallResponse);
   rpc byId(HallByIdRequest) returns (HallResponse);
   rpc byName(HallByNameRequest) returns (HallResponse);
+  rpc delete (HallByIdRequest) returns (DeleteHallResponse);
 }

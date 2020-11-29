@@ -38,14 +38,14 @@ public final class SeancesServiceImpl implements SeancesService {
 
     @Override
     public Seance addSeanceGrpc(SeanceRequest request) {
-        ManagedChannel hallChannel = ManagedChannelBuilder.forAddress("localhost", 7083).usePlaintext().build();
+        ManagedChannel hallChannel = ManagedChannelBuilder.forAddress("cinema-halls", 7083).usePlaintext().build();
         HallServiceGrpc.HallServiceBlockingStub hallStub = HallServiceGrpc.newBlockingStub(hallChannel);
         HallByNameRequest hall = HallByNameRequest.newBuilder().
                 setName(request.getHall().getName()).
                 build();
         HallResponse hallResponse = hallStub.byName(hall);
 
-        ManagedChannel filmChannel = ManagedChannelBuilder.forAddress("localhost", 7081).usePlaintext().build();
+        ManagedChannel filmChannel = ManagedChannelBuilder.forAddress("cinema-films", 7081).usePlaintext().build();
         FilmServiceGrpc.FilmServiceBlockingStub filmStub = FilmServiceGrpc.newBlockingStub(filmChannel);
         FilmByNameRequest film = FilmByNameRequest.newBuilder().
                 setName(request.getFilm().getName()).
@@ -67,7 +67,7 @@ public final class SeancesServiceImpl implements SeancesService {
     public Seance addSeance(Seance seance) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<HallDto> rateResponse =
-                restTemplate.exchange("http://cinema-halls:8083/hall/" + seance.getHallId().toString(),
+                restTemplate.exchange("http://localhost:8083/hall/" + seance.getHallId().toString(),
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<>() {
@@ -115,7 +115,7 @@ public final class SeancesServiceImpl implements SeancesService {
         WithdrawDto withdrawDto = new WithdrawDto(seance.getPrice());
         HttpEntity<WithdrawDto> entity = new HttpEntity<>(withdrawDto, headers);
         ResponseEntity<VisitorDto> response =
-                restTemplate.exchange("http://cinema-visitors:8084/visitor/withdraw/" + visitor.toString(),
+                restTemplate.exchange("http://localhost:8084/visitor/withdraw/" + visitor.toString(),
                         HttpMethod.PUT,
                         entity,
                         VisitorDto.class);
