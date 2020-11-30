@@ -44,6 +44,7 @@ public final class SeancesServiceImpl implements SeancesService {
                 setName(request.getHall().getName()).
                 build();
         HallResponse hallResponse = hallStub.byName(hall);
+        hallChannel.shutdown();
 
         ManagedChannel filmChannel = ManagedChannelBuilder.forAddress("cinema-films", 7081).usePlaintext().build();
         FilmServiceGrpc.FilmServiceBlockingStub filmStub = FilmServiceGrpc.newBlockingStub(filmChannel);
@@ -51,6 +52,7 @@ public final class SeancesServiceImpl implements SeancesService {
                 setName(request.getFilm().getName()).
                 build();
         FilmResponse filmResponse = filmStub.byName(film);
+        filmChannel.shutdown();
 
         Seance seance = new Seance(UUID.randomUUID(),
                 request.getSeanceDate(),
@@ -67,7 +69,7 @@ public final class SeancesServiceImpl implements SeancesService {
     public Seance addSeance(Seance seance) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<HallDto> rateResponse =
-                restTemplate.exchange("http://localhost:8083/hall/" + seance.getHallId().toString(),
+                restTemplate.exchange("http://cinema-halls:8083/hall/" + seance.getHallId().toString(),
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<>() {
@@ -115,7 +117,7 @@ public final class SeancesServiceImpl implements SeancesService {
         WithdrawDto withdrawDto = new WithdrawDto(seance.getPrice());
         HttpEntity<WithdrawDto> entity = new HttpEntity<>(withdrawDto, headers);
         ResponseEntity<VisitorDto> response =
-                restTemplate.exchange("http://localhost:8084/visitor/withdraw/" + visitor.toString(),
+                restTemplate.exchange("http://cinema-visitors:8084/visitor/withdraw/" + visitor.toString(),
                         HttpMethod.PUT,
                         entity,
                         VisitorDto.class);
