@@ -3,6 +3,7 @@ package com.cinema.seance.model;
 import com.cinema.seance.SeanceResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
 import javax.persistence.Entity;
@@ -12,28 +13,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@EnableAutoConfiguration
 @Entity
 @Data
+@NoArgsConstructor
+@EnableAutoConfiguration
 public final class Seance {
 
     @Id
     private UUID seanceId;
     private String seanceDate;
     private double price;
-    private UUID filmId;
     private UUID hallId;
+    private UUID filmId;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "seance")
     private List<Ticket> ticket;
 
-    public Seance() {
-        this.seanceId = UUID.randomUUID();
-        ticket = new ArrayList<>();
-    }
-
-    public Seance(UUID id, String date, double price, UUID filmId, UUID hallId) {
+    public Seance(UUID id, String date, double price, UUID hallId, UUID filmId) {
         seanceId = id;
         this.seanceDate = date;
         this.price = price;
@@ -50,29 +47,5 @@ public final class Seance {
                 setFilmId(filmId.toString()).
                 setHallId(hallId.toString()).
                 build();
-    }
-
-    public UUID getSeanceId() {
-        return seanceId;
-    }
-
-    public String getSeanceDate() {
-        return seanceDate;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public UUID getFilmId() {
-        return filmId;
-    }
-
-    public UUID getHallId() {
-        return hallId;
-    }
-
-    public List<Ticket> getTicket() {
-        return ticket;
     }
 }
